@@ -30,12 +30,12 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gap-2 glow" asChild>
+              <Button size="lg" className="gap-2 glow transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
                 <Link to="/auth?mode=signup">
-                  Get Started <ArrowRight className="h-4 w-4" />
+                  Get Started <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-primary-foreground" asChild>
                 <Link to="/auth">
                   Sign In
                 </Link>
@@ -56,8 +56,8 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="glass rounded-xl p-8 space-y-4">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="glass rounded-xl p-8 space-y-4 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl cursor-default">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center transition-colors duration-300 group-hover:bg-primary/20">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold">Risk Protection</h3>
@@ -66,8 +66,8 @@ export default function Landing() {
               </p>
             </div>
             
-            <div className="glass rounded-xl p-8 space-y-4">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="glass rounded-xl p-8 space-y-4 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl cursor-default">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center transition-colors duration-300 group-hover:bg-primary/20">
                 <TrendingUp className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold">Market Insights</h3>
@@ -76,8 +76,8 @@ export default function Landing() {
               </p>
             </div>
             
-            <div className="glass rounded-xl p-8 space-y-4">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="glass rounded-xl p-8 space-y-4 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl cursor-default">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center transition-colors duration-300 group-hover:bg-primary/20">
                 <Lock className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold">Secure & Private</h3>
@@ -97,9 +97,9 @@ export default function Landing() {
             <p className="text-muted-foreground mb-8">
               Join thousands of users who are already protecting themselves with Hedge AI.
             </p>
-            <Button size="lg" className="gap-2" asChild>
+            <Button size="lg" className="gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
               <Link to="/auth?mode=signup">
-                Start Free <ArrowRight className="h-4 w-4" />
+                Start Free <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </Button>
           </div>
