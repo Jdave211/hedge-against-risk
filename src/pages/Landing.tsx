@@ -8,7 +8,10 @@ export default function Landing() {
     <Layout>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
+        <div
+          className="absolute inset-0 pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-transparent"
+          aria-hidden="true"
+        />
         <div className="container mx-auto px-4 py-24 lg:py-32">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm">
