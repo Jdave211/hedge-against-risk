@@ -16,7 +16,7 @@ export function SearchBar({ large = false, placeholder = "Ask Hedge AI anything.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      navigate(`/chat?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
