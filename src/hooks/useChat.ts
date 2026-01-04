@@ -1,29 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
+import { searchEvents } from "@/lib/api";   
 import { supabase } from '@/integrations/supabase/client';
 import type { Conversation, Message, HedgeAPIResponse } from '@/types/chat';
 
 // TODO: Connect to your FastAPI backend
-const FASTAPI_BASE_URL = 'https://your-fastapi-backend.com'; // Replace with your FastAPI URL
+const FASTAPI_BASE_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
 async function sendToHedgeAPI(query: string): Promise<HedgeAPIResponse> {
-  // TODO: Replace this with actual FastAPI call
-  // Example:
-  // const response = await fetch(`${FASTAPI_BASE_URL}/search`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ query }),
-  // });
-  // return response.json();
+  const data: any = await searchEvents(query);
 
-  // Placeholder response for development
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        query,
-        results: [],
-      });
-    }, 1000);
-  });
+  // Backend returns: { query, results: [...] }
+  // But older shapes might be an array or { events: [...] }
+  const results = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.results)
+      ? data.results
+      : Array.isArray(data?.events)
+        ? data.events
+        : [];
+
+  return { query, results };
 }
 
 export function useChat(userId: string | undefined) {
