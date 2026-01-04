@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { LocationCombobox } from '@/components/ui/location-combobox';
 import { 
   Shield, Building2, User, ArrowRight, ArrowLeft, Loader2, 
   Check, Fuel, Home, Percent, Wheat, Users, CloudRain, Sparkles
@@ -28,14 +29,7 @@ const industries = [
   { id: 'other', label: 'Other', icon: Building2 },
 ];
 
-const regions = [
-  'Northeast US',
-  'Southeast US',
-  'Midwest US',
-  'Southwest US',
-  'West Coast US',
-  'International',
-];
+// Removed regions array - now using LocationCombobox
 
 const costExposures = [
   { id: 'fuel_energy', label: 'Fuel / Energy', icon: Fuel, description: 'Gas, electricity, transportation costs' },
@@ -73,7 +67,7 @@ export default function Onboarding() {
   // Step 1 - Business basics
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
-  const [region, setRegion] = useState('');
+  const [location, setLocation] = useState('');
   
   // Step 2 - Cost exposure
   const [selectedExposures, setSelectedExposures] = useState<string[]>([]);
@@ -119,7 +113,7 @@ export default function Onboarding() {
       const { error } = await supabase.from('profiles').insert({
         user_id: user.id,
         profile_type: profileType,
-        region: region,
+        region: location,
         industry: profileType === 'business' ? industry : null,
         risk_style: riskStyle,
         risk_horizon: planningWindow,
@@ -149,7 +143,7 @@ export default function Onboarding() {
   };
 
   const canProceed = () => {
-    if (step === 1) return companyName.trim() && industry && region;
+    if (step === 1) return companyName.trim() && industry && location;
     if (step === 2) return selectedExposures.length > 0;
     if (step === 3) return planningWindow;
     if (step === 4) return riskStyle;
@@ -302,25 +296,12 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-3">
-                <Label>Primary Region</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {regions.map((reg) => (
-                    <button
-                      key={reg}
-                      type="button"
-                      onClick={() => setRegion(reg)}
-                      className={cn(
-                        "p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium",
-                        "hover:border-primary/50 hover:bg-primary/5",
-                        region === reg 
-                          ? "border-primary bg-primary/10" 
-                          : "border-border"
-                      )}
-                    >
-                      {reg}
-                    </button>
-                  ))}
-                </div>
+                <Label>Location</Label>
+                <LocationCombobox
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="Search for your location..."
+                />
               </div>
             </CardContent>
           </Card>
