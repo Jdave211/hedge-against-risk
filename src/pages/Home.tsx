@@ -5,7 +5,7 @@ import { SearchBar } from '@/components/search/SearchBar';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Shield, AlertTriangle, Loader2 } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Loader2 } from 'lucide-react';
 
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -75,7 +75,7 @@ export default function Home() {
         {/* Quick Actions */}
         <section className="py-12">
           <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 gap-6">
             <Card 
               className="glass cursor-pointer hover:border-primary transition-colors"
               onClick={() => navigate('/dashboard')}
@@ -87,21 +87,6 @@ export default function Home() {
                 <CardTitle className="text-lg">View Dashboard</CardTitle>
                 <CardDescription>
                   Monitor your active hedges and recommendations
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card 
-              className="glass cursor-pointer hover:border-primary transition-colors"
-              onClick={() => navigate('/chat')}
-            >
-              <CardHeader>
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg">Chat with Hedge AI</CardTitle>
-                <CardDescription>
-                  Get personalized hedging recommendations
                 </CardDescription>
               </CardHeader>
             </Card>

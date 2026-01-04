@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,9 +81,32 @@ export default function Onboarding() {
   
   const [loading, setLoading] = useState(false);
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect to home if user already has a profile
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (authLoading) return;
+      if (!user) {
+        navigate('/');
+        return;
+      }
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (data) {
+        navigate('/home');
+      }
+    };
+    
+    checkProfile();
+  }, [user, authLoading, navigate]);
 
   const handleTypeSelect = (type: ProfileType) => {
     setProfileType(type);

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { Shield, LayoutDashboard, MessageSquare, User, LogOut } from 'lucide-react';
+import { Shield, LayoutDashboard, MessageSquare, User, LogOut, Home, Bell } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,12 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
+              <Link to="/home">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Home className="h-4 w-4" />
+                  <span className="hidden sm:inline">Home</span>
+                </Button>
+              </Link>
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LayoutDashboard className="h-4 w-4" />
@@ -43,6 +49,12 @@ export function Navbar() {
                   <span className="hidden sm:inline">Chat</span>
                 </Button>
               </Link>
+              <Button variant="ghost" size="sm" className="gap-2 relative">
+                <Bell className="h-4 w-4" />
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center">
+                  3
+                </span>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
