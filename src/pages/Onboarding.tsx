@@ -7,10 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 import { LocationCombobox } from '@/components/ui/location-combobox';
 import { 
   Shield, Building2, User, ArrowRight, ArrowLeft, Loader2, 
-  Check, Fuel, Home, Percent, Wheat, Users, CloudRain, Sparkles
+  Check, Fuel, Home, Percent, Wheat, Users, CloudRain, Sparkles,
+  Car, ShoppingCart, TrendingUp, Zap, Plane, Briefcase, 
+  GraduationCap, CreditCard, Landmark
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -18,6 +21,7 @@ import { cn } from '@/lib/utils';
 type ProfileType = 'person' | 'business';
 type RiskStyle = 'conservative' | 'balanced' | 'opportunistic';
 
+// ============ BUSINESS DATA ============
 const industries = [
   { id: 'technology', label: 'Technology', icon: Sparkles },
   { id: 'retail', label: 'Retail', icon: Building2 },
@@ -28,8 +32,6 @@ const industries = [
   { id: 'agriculture', label: 'Agriculture', icon: Wheat },
   { id: 'other', label: 'Other', icon: Building2 },
 ];
-
-// Removed regions array - now using LocationCombobox
 
 const costExposures = [
   { id: 'fuel_energy', label: 'Fuel / Energy', icon: Fuel, description: 'Gas, electricity, transportation costs' },
@@ -60,24 +62,77 @@ const riskStyles = [
   { id: 'opportunistic', label: 'Aggressive', description: 'Accept more variability for potential savings' },
 ];
 
+// ============ INDIVIDUAL DATA ============
+const budgetImpacts = [
+  { id: 'rent_housing', label: 'Rent / Housing', icon: Home },
+  { id: 'gas_transport', label: 'Gas / Transport', icon: Car },
+  { id: 'groceries_food', label: 'Groceries / Food', icon: ShoppingCart },
+  { id: 'inflation_cpi', label: 'Inflation (CPI)', icon: TrendingUp },
+  { id: 'interest_loans', label: 'Interest Rates / Loans', icon: Percent },
+  { id: 'utilities_energy', label: 'Utilities / Energy', icon: Zap },
+  { id: 'travel_costs', label: 'Travel Costs', icon: Plane },
+  { id: 'job_income_risk', label: 'Job / Income Risk', icon: Briefcase },
+];
+
+const individualPlanningWindows = [
+  { id: '30d', label: '30 days' },
+  { id: '90d', label: '90 days' },
+  { id: '180d', label: '6 months' },
+  { id: '365d', label: '1 year' },
+];
+
+const individualRiskStyles = [
+  { id: 'conservative', label: 'Conservative' },
+  { id: 'balanced', label: 'Balanced' },
+  { id: 'opportunistic', label: 'Aggressive' },
+];
+
+const hedgeBudgetRanges = [
+  { value: 0, label: '< $50' },
+  { value: 1, label: '$50 – $200' },
+  { value: 2, label: '$200 – $500' },
+  { value: 3, label: '$500+' },
+];
+
+const debtExposures = [
+  { id: 'student_loans', label: 'Student Loans', icon: GraduationCap },
+  { id: 'credit_card', label: 'Credit Card', icon: CreditCard },
+  { id: 'car_loan', label: 'Car Loan', icon: Car },
+  { id: 'mortgage', label: 'Mortgage', icon: Landmark },
+  { id: 'none', label: 'None', icon: Check },
+];
+
+const topExpenses = [
+  { id: 'rent', label: 'Rent' },
+  { id: 'food', label: 'Food' },
+  { id: 'transport', label: 'Transport' },
+  { id: 'tuition', label: 'Tuition' },
+  { id: 'utilities', label: 'Utilities' },
+  { id: 'other', label: 'Other' },
+];
+
 export default function Onboarding() {
   const [step, setStep] = useState<'type' | 1 | 2 | 3 | 4>('type');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   
-  // Step 1 - Business basics
+  // ============ BUSINESS STATE ============
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
   const [location, setLocation] = useState('');
-  
-  // Step 2 - Cost exposure
   const [selectedExposures, setSelectedExposures] = useState<string[]>([]);
-  
-  // Step 3 - Planning window
   const [planningWindow, setPlanningWindow] = useState('90d');
-  
-  // Step 4 - Exposure size & style
   const [exposureRange, setExposureRange] = useState([1]);
   const [riskStyle, setRiskStyle] = useState<RiskStyle>('balanced');
+  
+  // ============ INDIVIDUAL STATE ============
+  const [individualLocation, setIndividualLocation] = useState('');
+  const [selectedBudgetImpacts, setSelectedBudgetImpacts] = useState<string[]>([]);
+  const [individualPlanningWindow, setIndividualPlanningWindow] = useState('90d');
+  const [individualRiskStyle, setIndividualRiskStyle] = useState<RiskStyle>('balanced');
+  const [hedgeBudget, setHedgeBudget] = useState([1]);
+  const [selectedDebt, setSelectedDebt] = useState<string[]>([]);
+  const [selectedTopExpenses, setSelectedTopExpenses] = useState<string[]>([]);
+  const [protectAgainst, setProtectAgainst] = useState('');
   
   const [loading, setLoading] = useState(false);
 
@@ -85,7 +140,6 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect to home if user already has a profile
   useEffect(() => {
     const checkProfile = async () => {
       if (authLoading) return;
@@ -110,20 +164,38 @@ export default function Onboarding() {
 
   const handleTypeSelect = (type: ProfileType) => {
     setProfileType(type);
-    if (type === 'business') {
-      setStep(1);
-    } else {
-      // For individual, go to a simpler flow (keeping existing behavior)
-      setStep(1);
-    }
+    setStep(1);
   };
 
   const toggleExposure = (id: string) => {
     setSelectedExposures(prev => 
-      prev.includes(id) 
-        ? prev.filter(e => e !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]
     );
+  };
+
+  const toggleBudgetImpact = (id: string) => {
+    setSelectedBudgetImpacts(prev =>
+      prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]
+    );
+  };
+
+  const toggleDebt = (id: string) => {
+    if (id === 'none') {
+      setSelectedDebt(['none']);
+    } else {
+      setSelectedDebt(prev => {
+        const filtered = prev.filter(e => e !== 'none');
+        return filtered.includes(id) ? filtered.filter(e => e !== id) : [...filtered, id];
+      });
+    }
+  };
+
+  const toggleTopExpense = (id: string) => {
+    setSelectedTopExpenses(prev => {
+      if (prev.includes(id)) return prev.filter(e => e !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
   };
 
   const handleSubmit = async () => {
@@ -131,27 +203,49 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
-      const exposureLabel = exposureRanges[exposureRange[0]]?.label || '$5k – $25k';
-      
-      const { error } = await supabase.from('profiles').insert({
-        user_id: user.id,
-        profile_type: profileType,
-        region: location,
-        industry: profileType === 'business' ? industry : null,
-        risk_style: riskStyle,
-        risk_horizon: planningWindow,
-        sensitivities: selectedExposures,
-        profile_json: { 
-          name: companyName,
-          exposure_range: exposureLabel,
-        },
-      });
+      if (profileType === 'business') {
+        const exposureLabel = exposureRanges[exposureRange[0]]?.label || '$5k – $25k';
+        
+        const { error } = await supabase.from('profiles').insert({
+          user_id: user.id,
+          profile_type: profileType,
+          region: location,
+          industry: industry,
+          risk_style: riskStyle,
+          risk_horizon: planningWindow,
+          sensitivities: selectedExposures,
+          profile_json: { 
+            name: companyName,
+            exposure_range: exposureLabel,
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        const budgetLabel = hedgeBudgetRanges[hedgeBudget[0]]?.label || '$50 – $200';
+        
+        const { error } = await supabase.from('profiles').insert({
+          user_id: user.id,
+          profile_type: profileType,
+          region: individualLocation,
+          industry: null,
+          risk_style: individualRiskStyle,
+          risk_horizon: individualPlanningWindow,
+          sensitivities: selectedBudgetImpacts,
+          profile_json: { 
+            hedge_budget: budgetLabel,
+            debt_exposures: selectedDebt,
+            top_expenses: selectedTopExpenses,
+            protect_against: protectAgainst || null,
+          },
+        });
+
+        if (error) throw error;
+      }
 
       toast({
         title: 'Profile created!',
-        description: 'Welcome to Hedge AI. We\'re ready to help protect your business.',
+        description: `Welcome to Hedge AI. We're ready to help protect your ${profileType === 'business' ? 'business' : 'finances'}.`,
       });
       navigate('/home');
     } catch (error: any) {
@@ -166,10 +260,17 @@ export default function Onboarding() {
   };
 
   const canProceed = () => {
-    if (step === 1) return companyName.trim() && industry && location;
-    if (step === 2) return selectedExposures.length > 0;
-    if (step === 3) return planningWindow;
-    if (step === 4) return riskStyle;
+    if (profileType === 'business') {
+      if (step === 1) return companyName.trim() && industry && location;
+      if (step === 2) return selectedExposures.length > 0;
+      if (step === 3) return planningWindow;
+      if (step === 4) return riskStyle;
+    } else {
+      if (step === 1) return individualLocation;
+      if (step === 2) return selectedBudgetImpacts.length > 0;
+      if (step === 3) return individualPlanningWindow && individualRiskStyle && hedgeBudget.length > 0;
+      if (step === 4) return true; // Optional step
+    }
     return false;
   };
 
@@ -186,7 +287,6 @@ export default function Onboarding() {
     }
   };
 
-  // Progress indicator
   const ProgressBar = () => {
     const currentStep = typeof step === 'number' ? step : 0;
     return (
@@ -226,7 +326,7 @@ export default function Onboarding() {
               onClick={() => handleTypeSelect('person')}
             >
               <CardHeader className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-primary/20">
+                <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <User className="h-8 w-8 text-primary" />
                 </div>
                 <CardTitle>Individual</CardTitle>
@@ -241,7 +341,7 @@ export default function Onboarding() {
               onClick={() => handleTypeSelect('business')}
             >
               <CardHeader className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-primary/20">
+                <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <CardTitle>Business</CardTitle>
@@ -256,7 +356,302 @@ export default function Onboarding() {
     );
   }
 
-  // Business onboarding flow
+  // ============ INDIVIDUAL ONBOARDING FLOW ============
+  if (profileType === 'person') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4 py-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        
+        <div className="w-full max-w-2xl relative">
+          <ProgressBar />
+          
+          {/* Step 1 - Basics */}
+          {step === 1 && (
+            <Card className="glass animate-in fade-in slide-in-from-right-4 duration-500">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <User className="h-4 w-4" />
+                  Step 1 of 4
+                </div>
+                <CardTitle className="text-2xl">Basics</CardTitle>
+                <CardDescription>
+                  Where are you located? This helps us find relevant hedges.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Location</Label>
+                  <LocationCombobox
+                    value={individualLocation}
+                    onChange={setIndividualLocation}
+                    placeholder="Search for your location..."
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 2 - Budget Impacts */}
+          {step === 2 && (
+            <Card className="glass animate-in fade-in slide-in-from-right-4 duration-500">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Shield className="h-4 w-4" />
+                  Step 2 of 4
+                </div>
+                <CardTitle className="text-2xl">What impacts your budget?</CardTitle>
+                <CardDescription>
+                  Select all areas where price changes affect you.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {budgetImpacts.map((impact) => {
+                    const Icon = impact.icon;
+                    const isSelected = selectedBudgetImpacts.includes(impact.id);
+                    return (
+                      <button
+                        key={impact.id}
+                        type="button"
+                        onClick={() => toggleBudgetImpact(impact.id)}
+                        className={cn(
+                          "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200",
+                          "hover:border-primary/50 hover:bg-primary/5",
+                          isSelected 
+                            ? "border-primary bg-primary/10" 
+                            : "border-border"
+                        )}
+                      >
+                        <div className={cn(
+                          "h-10 w-10 rounded-lg flex items-center justify-center transition-colors",
+                          isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
+                        )}>
+                          {isSelected ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                        </div>
+                        <span className="text-xs font-medium text-center">{impact.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 3 - Planning + Style */}
+          {step === 3 && (
+            <Card className="glass animate-in fade-in slide-in-from-right-4 duration-500">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Shield className="h-4 w-4" />
+                  Step 3 of 4
+                </div>
+                <CardTitle className="text-2xl">Planning & Style</CardTitle>
+                <CardDescription>
+                  How do you approach planning and risk?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Planning Window */}
+                <div className="space-y-3">
+                  <Label className="text-base">How far ahead do you plan for price changes?</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {individualPlanningWindows.map((window) => (
+                      <button
+                        key={window.id}
+                        type="button"
+                        onClick={() => setIndividualPlanningWindow(window.id)}
+                        className={cn(
+                          "p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200",
+                          "hover:border-primary/50 hover:bg-primary/5",
+                          individualPlanningWindow === window.id 
+                            ? "border-primary bg-primary/10" 
+                            : "border-border"
+                        )}
+                      >
+                        {window.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Risk Style */}
+                <div className="space-y-3">
+                  <Label className="text-base">Risk style</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {individualRiskStyles.map((style) => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={() => setIndividualRiskStyle(style.id as RiskStyle)}
+                        className={cn(
+                          "p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200",
+                          "hover:border-primary/50 hover:bg-primary/5",
+                          individualRiskStyle === style.id 
+                            ? "border-primary bg-primary/10" 
+                            : "border-border"
+                        )}
+                      >
+                        {style.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Monthly Hedge Budget */}
+                <div className="space-y-6">
+                  <Label className="text-base">Monthly hedge budget</Label>
+                  <div className="px-2">
+                    <Slider
+                      value={hedgeBudget}
+                      onValueChange={setHedgeBudget}
+                      max={3}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between mt-4">
+                      {hedgeBudgetRanges.map((range, i) => (
+                        <span 
+                          key={range.value}
+                          className={cn(
+                            "text-sm transition-colors",
+                            hedgeBudget[0] === i ? "text-primary font-medium" : "text-muted-foreground"
+                          )}
+                        >
+                          {range.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 4 - Quick Context (Optional) */}
+          {step === 4 && (
+            <Card className="glass animate-in fade-in slide-in-from-right-4 duration-500">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Shield className="h-4 w-4" />
+                  Step 4 of 4 — Optional
+                </div>
+                <CardTitle className="text-2xl">Quick Context</CardTitle>
+                <CardDescription>
+                  Help us personalize even more (you can skip this).
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Debt Exposure */}
+                <div className="space-y-3">
+                  <Label className="text-base">Debt exposure</Label>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {debtExposures.map((debt) => {
+                      const Icon = debt.icon;
+                      const isSelected = selectedDebt.includes(debt.id);
+                      return (
+                        <button
+                          key={debt.id}
+                          type="button"
+                          onClick={() => toggleDebt(debt.id)}
+                          className={cn(
+                            "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200",
+                            "hover:border-primary/50 hover:bg-primary/5",
+                            isSelected 
+                              ? "border-primary bg-primary/10" 
+                              : "border-border"
+                          )}
+                        >
+                          <Icon className={cn(
+                            "h-5 w-5 transition-colors",
+                            isSelected ? "text-primary" : "text-muted-foreground"
+                          )} />
+                          <span className="text-xs font-medium text-center">{debt.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Top Expenses */}
+                <div className="space-y-3">
+                  <Label className="text-base">Top expenses (pick up to 3)</Label>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {topExpenses.map((expense) => {
+                      const isSelected = selectedTopExpenses.includes(expense.id);
+                      const isDisabled = !isSelected && selectedTopExpenses.length >= 3;
+                      return (
+                        <button
+                          key={expense.id}
+                          type="button"
+                          onClick={() => toggleTopExpense(expense.id)}
+                          disabled={isDisabled}
+                          className={cn(
+                            "p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200",
+                            "hover:border-primary/50 hover:bg-primary/5",
+                            isSelected 
+                              ? "border-primary bg-primary/10" 
+                              : "border-border",
+                            isDisabled && "opacity-50 cursor-not-allowed hover:border-border hover:bg-transparent"
+                          )}
+                        >
+                          {expense.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Protect Against */}
+                <div className="space-y-3">
+                  <Label className="text-base">What else would you like to protect against?</Label>
+                  <Textarea
+                    value={protectAgainst}
+                    onChange={(e) => setProtectAgainst(e.target.value)}
+                    placeholder="E.g., concert ticket price increases, flight delays, crypto volatility..."
+                    className="min-h-[80px] resize-none"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Navigation buttons */}
+          <div className="flex justify-between mt-6">
+            <Button
+              variant="ghost"
+              onClick={goBack}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            
+            <Button
+              onClick={goNext}
+              disabled={!canProceed() || loading}
+              className="gap-2 min-w-[140px]"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : step === 4 ? (
+                <>
+                  Complete Setup
+                  <Check className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============ BUSINESS ONBOARDING FLOW ============
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 py-8">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
