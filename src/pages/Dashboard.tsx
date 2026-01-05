@@ -22,7 +22,7 @@ interface Recommendation {
   outcome_id: string | null;
   rec_json: Json;
   markets?: { title: string; url: string | null; category: string | null } | null;
-  kalshi_events?: { title: string; subtitle: string | null } | null;
+  kalshi_events?: { title: string; subtitle: string | null; series_ticker: string | null } | null;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -66,7 +66,7 @@ export default function Dashboard() {
       .select(`
         *,
         markets(title, url, category),
-        kalshi_events(title, subtitle)
+        kalshi_events(title, subtitle, series_ticker)
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
@@ -87,7 +87,7 @@ export default function Dashboard() {
           .select(`
             *,
             markets(title, url, category),
-            kalshi_events(title, subtitle)
+            kalshi_events(title, subtitle, series_ticker)
           `)
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
@@ -195,7 +195,8 @@ function RecommendationsList({ recommendations }: { recommendations: Recommendat
         const marketTitle = rec.markets?.title;
         const eventTitle = rec.kalshi_events?.title;
         const category = rec.markets?.category;
-        const marketUrl = rec.markets?.url;
+        const seriesTicker = rec.kalshi_events?.series_ticker;
+        const kalshiUrl = seriesTicker ? `https://kalshi.com/markets/${seriesTicker}` : null;
 
         return (
           <Card key={rec.id} className="glass hover:border-primary/50 transition-colors">
@@ -255,25 +256,17 @@ function RecommendationsList({ recommendations }: { recommendations: Recommendat
                         Target: {(rec.price_threshold * 100).toFixed(0)}¢
                       </div>
                     )}
-                    {marketUrl && (
+                    {kalshiUrl && (
                       <a
-                        href={marketUrl}
+                        href={kalshiUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-primary hover:underline"
                       >
-                        View Market <ExternalLink className="h-3 w-3" />
+                        View on Kalshi <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
-                </div>
-
-                {/* Match Score */}
-                <div className="text-right shrink-0">
-                  <p className="text-3xl font-bold text-primary">
-                    {Math.round(rec.match_score * 100)}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">Match</p>
                 </div>
               </div>
             </CardContent>
