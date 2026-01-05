@@ -10,109 +10,29 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { LocationCombobox } from '@/components/ui/location-combobox';
 import { 
-  Shield, Building2, User, ArrowRight, ArrowLeft, Loader2, 
-  Check, Fuel, Home, Percent, Wheat, Users, CloudRain, Sparkles,
-  Car, ShoppingCart, TrendingUp, Zap, Plane, Briefcase, 
-  GraduationCap, CreditCard, Landmark
+  Shield, Building2, User, ArrowRight, ArrowLeft, Loader2, Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
-type ProfileType = 'person' | 'business';
-type RiskStyle = 'conservative' | 'balanced' | 'opportunistic';
-
-// ============ BUSINESS DATA ============
-const industries = [
-  { id: 'technology', label: 'Technology', icon: Sparkles },
-  { id: 'retail', label: 'Retail', icon: Building2 },
-  { id: 'manufacturing', label: 'Manufacturing', icon: Building2 },
-  { id: 'food_service', label: 'Food Service', icon: Wheat },
-  { id: 'transportation', label: 'Transportation', icon: Fuel },
-  { id: 'real_estate', label: 'Real Estate', icon: Home },
-  { id: 'agriculture', label: 'Agriculture', icon: Wheat },
-  { id: 'other', label: 'Other', icon: Building2 },
-];
-
-const costExposures = [
-  { id: 'fuel_energy', label: 'Fuel / Energy', icon: Fuel, description: 'Gas, electricity, transportation costs' },
-  { id: 'rent_real_estate', label: 'Rent / Real Estate', icon: Home, description: 'Lease costs, property values' },
-  { id: 'interest_rates', label: 'Interest Rates', icon: Percent, description: 'Loans, credit, financing' },
-  { id: 'food_commodities', label: 'Food / Commodities', icon: Wheat, description: 'Raw materials, ingredients' },
-  { id: 'labor', label: 'Labor', icon: Users, description: 'Wages, staffing costs' },
-  { id: 'weather', label: 'Weather Impacts', icon: CloudRain, description: 'Seasonal, climate events' },
-];
-
-const planningWindows = [
-  { id: '30d', label: 'Next 30 days', description: 'Short-term operational planning' },
-  { id: '90d', label: '3 months', description: 'Quarterly business cycles' },
-  { id: '180d', label: '6 months', description: 'Semi-annual forecasting' },
-  { id: '365d', label: '1 year', description: 'Annual budgeting horizon' },
-];
-
-const exposureRanges = [
-  { value: 0, label: '< $5k' },
-  { value: 1, label: '$5k – $25k' },
-  { value: 2, label: '$25k – $100k' },
-  { value: 3, label: '$100k+' },
-];
-
-const riskStyles = [
-  { id: 'conservative', label: 'Conservative', description: 'Prioritize stability and predictable costs' },
-  { id: 'balanced', label: 'Balanced', description: 'Balance protection with flexibility' },
-  { id: 'opportunistic', label: 'Aggressive', description: 'Accept more variability for potential savings' },
-];
-
-// ============ INDIVIDUAL DATA ============
-const budgetImpacts = [
-  { id: 'rent_housing', label: 'Rent / Housing', icon: Home },
-  { id: 'gas_transport', label: 'Gas / Transport', icon: Car },
-  { id: 'groceries_food', label: 'Groceries / Food', icon: ShoppingCart },
-  { id: 'inflation_cpi', label: 'Inflation (CPI)', icon: TrendingUp },
-  { id: 'interest_loans', label: 'Interest Rates / Loans', icon: Percent },
-  { id: 'utilities_energy', label: 'Utilities / Energy', icon: Zap },
-  { id: 'travel_costs', label: 'Travel Costs', icon: Plane },
-  { id: 'job_income_risk', label: 'Job / Income Risk', icon: Briefcase },
-];
-
-const individualPlanningWindows = [
-  { id: '30d', label: '30 days' },
-  { id: '90d', label: '90 days' },
-  { id: '180d', label: '6 months' },
-  { id: '365d', label: '1 year' },
-];
-
-const individualRiskStyles = [
-  { id: 'conservative', label: 'Conservative' },
-  { id: 'balanced', label: 'Balanced' },
-  { id: 'opportunistic', label: 'Aggressive' },
-];
-
-const hedgeBudgetRanges = [
-  { value: 0, label: '< $50' },
-  { value: 1, label: '$50 – $200' },
-  { value: 2, label: '$200 – $500' },
-  { value: 3, label: '$500+' },
-];
-
-const debtExposures = [
-  { id: 'student_loans', label: 'Student Loans', icon: GraduationCap },
-  { id: 'credit_card', label: 'Credit Card', icon: CreditCard },
-  { id: 'car_loan', label: 'Car Loan', icon: Car },
-  { id: 'mortgage', label: 'Mortgage', icon: Landmark },
-  { id: 'none', label: 'None', icon: Check },
-];
-
-const topExpenses = [
-  { id: 'rent', label: 'Rent' },
-  { id: 'food', label: 'Food' },
-  { id: 'transport', label: 'Transport' },
-  { id: 'tuition', label: 'Tuition' },
-  { id: 'utilities', label: 'Utilities' },
-  { id: 'other', label: 'Other' },
-];
+import { ReviewStep } from '@/components/onboarding/ReviewStep';
+import {
+  ProfileType,
+  RiskStyle,
+  industries,
+  costExposures,
+  planningWindows,
+  exposureRanges,
+  riskStyles,
+  budgetImpacts,
+  individualPlanningWindows,
+  individualRiskStyles,
+  hedgeBudgetRanges,
+  debtExposures,
+  topExpenses,
+} from '@/components/onboarding/onboarding-data';
 
 export default function Onboarding() {
-  const [step, setStep] = useState<'type' | 1 | 2 | 3 | 4>('type');
+  const [step, setStep] = useState<'type' | 1 | 2 | 3 | 4 | 5>('type');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   
   // ============ BUSINESS STATE ============
@@ -265,33 +185,39 @@ export default function Onboarding() {
       if (step === 2) return selectedExposures.length > 0;
       if (step === 3) return planningWindow;
       if (step === 4) return riskStyle;
+      if (step === 5) return true; // Review step
     } else {
       if (step === 1) return individualLocation;
       if (step === 2) return selectedBudgetImpacts.length > 0;
       if (step === 3) return individualPlanningWindow && individualRiskStyle && hedgeBudget.length > 0;
       if (step === 4) return true; // Optional step
+      if (step === 5) return true; // Review step
     }
     return false;
   };
 
   const goBack = () => {
     if (step === 1) setStep('type');
-    else if (typeof step === 'number') setStep((step - 1) as 1 | 2 | 3);
+    else if (typeof step === 'number') setStep((step - 1) as 1 | 2 | 3 | 4);
   };
 
   const goNext = () => {
-    if (typeof step === 'number' && step < 4) {
-      setStep((step + 1) as 2 | 3 | 4);
-    } else if (step === 4) {
+    if (typeof step === 'number' && step < 5) {
+      setStep((step + 1) as 2 | 3 | 4 | 5);
+    } else if (step === 5) {
       handleSubmit();
     }
+  };
+
+  const goToStep = (stepNum: number) => {
+    setStep(stepNum as 1 | 2 | 3 | 4);
   };
 
   const ProgressBar = () => {
     const currentStep = typeof step === 'number' ? step : 0;
     return (
       <div className="flex items-center gap-2 mb-8">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className="flex items-center flex-1">
             <div 
               className={cn(
@@ -371,7 +297,7 @@ export default function Onboarding() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                   <User className="h-4 w-4" />
-                  Step 1 of 4
+                  Step 1 of 5
                 </div>
                 <CardTitle className="text-2xl">Basics</CardTitle>
                 <CardDescription>
@@ -397,7 +323,7 @@ export default function Onboarding() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                   <Shield className="h-4 w-4" />
-                  Step 2 of 4
+                  Step 2 of 5
                 </div>
                 <CardTitle className="text-2xl">What impacts your budget?</CardTitle>
                 <CardDescription>
@@ -443,7 +369,7 @@ export default function Onboarding() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                   <Shield className="h-4 w-4" />
-                  Step 3 of 4
+                  Step 3 of 5
                 </div>
                 <CardTitle className="text-2xl">Planning & Style</CardTitle>
                 <CardDescription>
@@ -533,7 +459,7 @@ export default function Onboarding() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                   <Shield className="h-4 w-4" />
-                  Step 4 of 4 — Optional
+                  Step 4 of 5 — Optional
                 </div>
                 <CardTitle className="text-2xl">Quick Context</CardTitle>
                 <CardDescription>
@@ -615,6 +541,22 @@ export default function Onboarding() {
             </Card>
           )}
 
+          {/* Step 5 - Review */}
+          {step === 5 && (
+            <ReviewStep
+              profileType="person"
+              individualLocation={individualLocation}
+              selectedBudgetImpacts={selectedBudgetImpacts}
+              individualPlanningWindow={individualPlanningWindow}
+              individualRiskStyle={individualRiskStyle}
+              hedgeBudget={hedgeBudget}
+              selectedDebt={selectedDebt}
+              selectedTopExpenses={selectedTopExpenses}
+              protectAgainst={protectAgainst}
+              onEdit={goToStep}
+            />
+          )}
+
           {/* Navigation buttons */}
           <div className="flex justify-between mt-6">
             <Button
@@ -633,7 +575,7 @@ export default function Onboarding() {
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              ) : step === 4 ? (
+              ) : step === 5 ? (
                 <>
                   Complete Setup
                   <Check className="h-4 w-4" />
@@ -665,7 +607,7 @@ export default function Onboarding() {
             <CardHeader>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Building2 className="h-4 w-4" />
-                Step 1 of 4
+                Step 1 of 5
               </div>
               <CardTitle className="text-2xl">Business Basics</CardTitle>
               <CardDescription>
@@ -731,7 +673,7 @@ export default function Onboarding() {
             <CardHeader>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Shield className="h-4 w-4" />
-                Step 2 of 4
+                Step 2 of 5
               </div>
               <CardTitle className="text-2xl">Cost Exposure</CardTitle>
               <CardDescription>
@@ -780,7 +722,7 @@ export default function Onboarding() {
             <CardHeader>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Shield className="h-4 w-4" />
-                Step 3 of 4
+                Step 3 of 5
               </div>
               <CardTitle className="text-2xl">Planning Window</CardTitle>
               <CardDescription>
@@ -823,7 +765,7 @@ export default function Onboarding() {
             <CardHeader>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Shield className="h-4 w-4" />
-                Step 4 of 4
+                Step 4 of 5
               </div>
               <CardTitle className="text-2xl">Exposure Size & Style</CardTitle>
               <CardDescription>
@@ -907,6 +849,21 @@ export default function Onboarding() {
           </Card>
         )}
 
+        {/* Step 5 - Review */}
+        {step === 5 && (
+          <ReviewStep
+            profileType="business"
+            companyName={companyName}
+            industry={industry}
+            location={location}
+            selectedExposures={selectedExposures}
+            planningWindow={planningWindow}
+            exposureRange={exposureRange}
+            riskStyle={riskStyle}
+            onEdit={goToStep}
+          />
+        )}
+
         {/* Navigation buttons */}
         {typeof step === 'number' && (
           <div className="flex justify-between mt-6">
@@ -926,7 +883,7 @@ export default function Onboarding() {
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              ) : step === 4 ? (
+              ) : step === 5 ? (
                 <>
                   Complete Setup
                   <Check className="h-4 w-4" />
