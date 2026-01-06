@@ -139,6 +139,7 @@ export default function Onboarding() {
           risk_style: riskStyle,
           risk_horizon: planningWindow,
           sensitivities: selectedExposures,
+          hedge_budget_monthly: 1000,
           profile_json: { 
             name: companyName,
             description: businessDescription || null,
@@ -158,6 +159,7 @@ export default function Onboarding() {
           risk_style: individualRiskStyle,
           risk_horizon: individualPlanningWindow,
           sensitivities: selectedBudgetImpacts,
+          hedge_budget_monthly: 500,
           profile_json: { 
             description: individualDescription || null,
             hedge_budget: budgetLabel,
