@@ -9,19 +9,10 @@ interface MarketResultCardProps {
 }
 
 export function MarketResultCard({ result }: MarketResultCardProps) {
-  // Construct Kalshi URL from series_ticker or external_market_id
-  const getKalshiUrl = () => {
-    if (result.series_ticker) {
-      return `https://kalshi.com/markets/${result.series_ticker.toLowerCase()}`;
-    }
-    // Fallback: use first market's external_market_id
-    if (result.markets.length > 0 && result.markets[0].external_market_id) {
-      return `https://kalshi.com/markets/${result.markets[0].external_market_id.toLowerCase()}`;
-    }
-    return null;
-  };
-
-  const kalshiUrl = getKalshiUrl();
+  // Construct Kalshi URL from series_ticker (same as recommendations page)
+  const kalshiUrl = result.series_ticker
+    ? `https://kalshi.com/markets/${result.series_ticker.toLowerCase()}`
+    : null;
 
   return (
     <Card className="bg-muted/50">
