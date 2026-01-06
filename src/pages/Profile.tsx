@@ -16,7 +16,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
 import {
-  ProfileType,
   RiskStyle,
   industries,
   costExposures,
@@ -26,7 +25,6 @@ import {
   budgetImpacts,
   individualPlanningWindows,
   individualRiskStyles,
-  hedgeBudgetRanges,
   debtExposures,
   topExpenses,
 } from '@/components/onboarding/onboarding-data';
@@ -57,13 +55,14 @@ export default function Profile() {
   const [planningWindow, setPlanningWindow] = useState('90d');
   const [exposureRange, setExposureRange] = useState([1]);
   const [riskStyle, setRiskStyle] = useState<RiskStyle>('balanced');
+  const [businessHedgeBudget, setBusinessHedgeBudget] = useState('1000');
 
   // Individual fields
   const [individualLocation, setIndividualLocation] = useState('');
   const [selectedBudgetImpacts, setSelectedBudgetImpacts] = useState<string[]>([]);
   const [individualPlanningWindow, setIndividualPlanningWindow] = useState('90d');
   const [individualRiskStyle, setIndividualRiskStyle] = useState<RiskStyle>('balanced');
-  const [hedgeBudget, setHedgeBudget] = useState([1]);
+  const [individualHedgeBudget, setIndividualHedgeBudget] = useState('500');
   const [selectedDebt, setSelectedDebt] = useState<string[]>([]);
   const [selectedTopExpenses, setSelectedTopExpenses] = useState<string[]>([]);
   const [protectAgainst, setProtectAgainst] = useState('');
@@ -105,6 +104,7 @@ export default function Profile() {
       setSelectedExposures(data.sensitivities || []);
       setPlanningWindow(data.risk_horizon || '90d');
       setRiskStyle(data.risk_style);
+      setBusinessHedgeBudget(String(data.hedge_budget_monthly || 1000));
       // Parse exposure range from label
       const rangeIndex = exposureRanges.findIndex(r => r.label === profileJson?.exposure_range);
       setExposureRange([rangeIndex >= 0 ? rangeIndex : 1]);
@@ -114,9 +114,7 @@ export default function Profile() {
       setSelectedBudgetImpacts(data.sensitivities || []);
       setIndividualPlanningWindow(data.risk_horizon || '90d');
       setIndividualRiskStyle(data.risk_style);
-      // Parse hedge budget from label
-      const budgetIndex = hedgeBudgetRanges.findIndex(r => r.label === profileJson?.hedge_budget);
-      setHedgeBudget([budgetIndex >= 0 ? budgetIndex : 1]);
+      setIndividualHedgeBudget(String(data.hedge_budget_monthly || 500));
       setSelectedDebt(profileJson?.debt_exposures || []);
       setSelectedTopExpenses(profileJson?.top_expenses || []);
       setProtectAgainst(profileJson?.protect_against || '');
@@ -172,6 +170,7 @@ export default function Profile() {
             risk_style: riskStyle,
             risk_horizon: planningWindow,
             sensitivities: selectedExposures,
+            hedge_budget_monthly: parseFloat(businessHedgeBudget) || 1000,
             profile_json: { 
               name: companyName,
               description: description || null,
@@ -182,8 +181,6 @@ export default function Profile() {
 
         if (error) throw error;
       } else {
-        const budgetLabel = hedgeBudgetRanges[hedgeBudget[0]]?.label || '$50 – $200';
-        
         const { error } = await supabase
           .from('profiles')
           .update({
@@ -191,9 +188,9 @@ export default function Profile() {
             risk_style: individualRiskStyle,
             risk_horizon: individualPlanningWindow,
             sensitivities: selectedBudgetImpacts,
+            hedge_budget_monthly: parseFloat(individualHedgeBudget) || 500,
             profile_json: { 
               description: description || null,
-              hedge_budget: budgetLabel,
               debt_exposures: selectedDebt,
               top_expenses: selectedTopExpenses,
               protect_against: protectAgainst || null,
@@ -426,6 +423,21 @@ export default function Profile() {
                     </div>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>Monthly Hedge Budget</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">$</span>
+                      <Input
+                        type="number"
+                        value={businessHedgeBudget}
+                        onChange={(e) => setBusinessHedgeBudget(e.target.value)}
+                        placeholder="1000"
+                        className="max-w-[150px]"
+                      />
+                      <span className="text-sm text-muted-foreground">/ month</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-3">
                     <Label>Risk Style</Label>
                     <div className="grid gap-2">
@@ -599,29 +611,18 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <Label>Monthly Hedge Budget</Label>
-                    <div className="px-2">
-                      <Slider
-                        value={hedgeBudget}
-                        onValueChange={setHedgeBudget}
-                        max={3}
-                        step={1}
-                        className="w-full"
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">$</span>
+                      <Input
+                        type="number"
+                        value={individualHedgeBudget}
+                        onChange={(e) => setIndividualHedgeBudget(e.target.value)}
+                        placeholder="500"
+                        className="max-w-[150px]"
                       />
-                      <div className="flex justify-between mt-3">
-                        {hedgeBudgetRanges.map((range, i) => (
-                          <span 
-                            key={range.value}
-                            className={cn(
-                              "text-xs transition-colors",
-                              hedgeBudget[0] === i ? "text-primary font-medium" : "text-muted-foreground"
-                            )}
-                          >
-                            {range.label}
-                          </span>
-                        ))}
-                      </div>
+                      <span className="text-sm text-muted-foreground">/ month</span>
                     </div>
                   </div>
                 </CardContent>
