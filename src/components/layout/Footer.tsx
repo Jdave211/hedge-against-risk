@@ -9,7 +9,10 @@ export function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold">Hedge</span>
+              <div className="flex flex-col leading-tight">
+                <span className="text-lg font-bold">Probable</span>
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wider">hedge</span>
+              </div>
             </Link>
             <p className="text-sm text-muted-foreground">
               Protect yourself from real-world risks using prediction markets.

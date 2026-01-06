@@ -42,7 +42,10 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to={user ? '/home' : '/'} className="flex items-center gap-2">
           <Shield className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold">Hedge</span>
+          <div className="flex flex-col leading-tight">
+            <span className="text-xl font-bold">Probable</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">hedge</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -116,7 +119,10 @@ export function Navbar() {
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
                   <Shield className="h-6 w-6 text-primary" />
-                  Hedge
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-lg font-bold">Probable</span>
+                    <span className="text-[9px] text-muted-foreground uppercase tracking-wider">hedge</span>
+                  </div>
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-2 mt-6">
