@@ -12,6 +12,7 @@ import { LocationCombobox } from '@/components/ui/location-combobox';
 import { 
   Shield, Building2, User, ArrowRight, ArrowLeft, Loader2, Check
 } from 'lucide-react';
+import { FileUpload } from '@/components/onboarding/FileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ReviewStep } from '@/components/onboarding/ReviewStep';
@@ -53,6 +54,8 @@ export default function Onboarding() {
   const [selectedDebt, setSelectedDebt] = useState<string[]>([]);
   const [selectedTopExpenses, setSelectedTopExpenses] = useState<string[]>([]);
   const [protectAgainst, setProtectAgainst] = useState('');
+  const [individualDocuments, setIndividualDocuments] = useState<string[]>([]);
+  const [businessDocuments, setBusinessDocuments] = useState<string[]>([]);
   
   const [loading, setLoading] = useState(false);
 
@@ -537,6 +540,16 @@ export default function Onboarding() {
                     className="min-h-[80px] resize-none"
                   />
                 </div>
+
+                {/* Bank Statement Upload */}
+                {user && (
+                  <FileUpload
+                    userId={user.id}
+                    documentType="bank-statement"
+                    existingFiles={individualDocuments}
+                    onFilesChange={setIndividualDocuments}
+                  />
+                )}
               </CardContent>
             </Card>
           )}
@@ -845,6 +858,16 @@ export default function Onboarding() {
                   ))}
                 </div>
               </div>
+
+              {/* Earnings Upload */}
+              {user && (
+                <FileUpload
+                  userId={user.id}
+                  documentType="earnings"
+                  existingFiles={businessDocuments}
+                  onFilesChange={setBusinessDocuments}
+                />
+              )}
             </CardContent>
           </Card>
         )}

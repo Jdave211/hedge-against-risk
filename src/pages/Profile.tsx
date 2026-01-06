@@ -11,6 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { LocationCombobox } from '@/components/ui/location-combobox';
 import { Loader2, Save, Check } from 'lucide-react';
+import { FileUpload } from '@/components/onboarding/FileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
@@ -444,6 +445,22 @@ export default function Profile() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Earnings Upload */}
+              <Card className="glass">
+                <CardHeader>
+                  <CardTitle>Documents</CardTitle>
+                  <CardDescription>Upload earnings reports or financial statements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {user && (
+                    <FileUpload
+                      userId={user.id}
+                      documentType="earnings"
+                    />
+                  )}
+                </CardContent>
+              </Card>
             </>
           ) : (
             <>
@@ -653,6 +670,22 @@ export default function Profile() {
                       className="min-h-[80px] resize-none"
                     />
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Bank Statement Upload */}
+              <Card className="glass">
+                <CardHeader>
+                  <CardTitle>Documents</CardTitle>
+                  <CardDescription>Upload bank statements to help analyze spending patterns</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {user && (
+                    <FileUpload
+                      userId={user.id}
+                      documentType="bank-statement"
+                    />
+                  )}
                 </CardContent>
               </Card>
             </>
