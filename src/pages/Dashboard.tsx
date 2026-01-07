@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, Clock, CheckCircle, Loader2, ExternalLink, DollarSign, X, Undo2 } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, Loader2, ExternalLink, DollarSign, X, Undo2, TrendingDown, ShieldCheck } from 'lucide-react';
 import { Json } from '@/integrations/supabase/types';
 import { logAction } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,8 @@ interface Recommendation {
   rationale: string;
   price_now: number | null;
   price_threshold: number | null;
+  estimated_loss: number | null;
+  estimated_recovery: number | null;
   created_at: string;
   event_id: string | null;
   market_id: string | null;
@@ -339,6 +341,24 @@ function RecommendationsList({ recommendations, onDismiss, onKalshiClick }: Reco
                   <p className="text-muted-foreground text-sm">
                     {rec.rationale || 'No rationale provided'}
                   </p>
+
+                  {/* Loss/Recovery info */}
+                  {(rec.estimated_loss !== null || rec.estimated_recovery !== null) && (
+                    <div className="flex items-center gap-4 text-sm">
+                      {rec.estimated_loss !== null && (
+                        <div className="flex items-center gap-1 text-destructive">
+                          <TrendingDown className="h-4 w-4" />
+                          <span>Est. Loss: <strong>${rec.estimated_loss.toLocaleString()}</strong></span>
+                        </div>
+                      )}
+                      {rec.estimated_recovery !== null && (
+                        <div className="flex items-center gap-1 text-green-600 dark:text-green-500">
+                          <ShieldCheck className="h-4 w-4" />
+                          <span>Est. Recovery: <strong>${rec.estimated_recovery.toLocaleString()}</strong></span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Price info and actions */}
                   <div className="flex items-center justify-between flex-wrap gap-4">

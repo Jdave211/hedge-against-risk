@@ -501,6 +501,8 @@ export type Database = {
       recommendations: {
         Row: {
           created_at: string
+          estimated_loss: number | null
+          estimated_recovery: number | null
           event_id: string | null
           id: string
           market_id: string | null
@@ -516,6 +518,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          estimated_loss?: number | null
+          estimated_recovery?: number | null
           event_id?: string | null
           id?: string
           market_id?: string | null
@@ -531,6 +535,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          estimated_loss?: number | null
+          estimated_recovery?: number | null
           event_id?: string | null
           id?: string
           market_id?: string | null
