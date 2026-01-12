@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Save, ArrowRight } from 'lucide-react';
+import { Loader2, Save, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
@@ -12,6 +12,7 @@ import {
   exposureRanges,
   RiskStyle,
 } from '@/components/onboarding/onboarding-data';
+import { Progress } from '@/components/ui/progress';
 
 // Import newly refactored sub-components
 import { RiskIdentity } from '@/components/profile/RiskIdentity';
@@ -19,7 +20,8 @@ import { ExposureMatrix } from '@/components/profile/ExposureMatrix';
 import { HedgingPreferences } from '@/components/profile/HedgingPreferences';
 
 interface ProfileJson {
-  name?: string;
+  name?: string;  // User's personal name
+  company_name?: string;  // Business name (for business profiles)
   description?: string;
   exposure_range?: string;
   hedge_budget?: string;
@@ -37,6 +39,7 @@ export default function Profile() {
   const { toast } = useToast();
 
   // State Management
+  const [userName, setUserName] = useState('');  // User's personal name
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
   const [location, setLocation] = useState('');
@@ -51,6 +54,7 @@ export default function Profile() {
   const [exposureRange, setExposureRange] = useState([1]);
   const [riskStyle, setRiskStyle] = useState<RiskStyle>('balanced');
   const [hedgeBudget, setHedgeBudget] = useState('1000');
+  const initialSnapshotRef = useRef<string>('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -78,7 +82,8 @@ export default function Profile() {
     const isBiz = data.profile_type === 'business';
 
     // Hydrate state
-    setCompanyName(pJson?.name || '');
+    setUserName(pJson?.name || '');  // User's personal name
+    setCompanyName(pJson?.company_name || pJson?.name || '');  // For business: separate field
     setDescription(pJson?.description || '');
     setLocation(data.region || '');
     setIndustry(data.industry || '');
@@ -95,6 +100,20 @@ export default function Profile() {
     // Parse exposure slider
     const rangeIndex = exposureRanges.findIndex(r => r.label === pJson?.exposure_range);
     setExposureRange([rangeIndex >= 0 ? rangeIndex : 1]);
+
+    // Store initial snapshot for dirty-checking
+    initialSnapshotRef.current = JSON.stringify({
+      companyName: pJson?.name || '',
+      industry: data.industry || '',
+      location: data.region || '',
+      description: pJson?.description || '',
+      selectedExposures: data.sensitivities || [],
+      selectedDebt: pJson?.debt_exposures || [],
+      planningWindow: data.risk_horizon || '90d',
+      exposureRange: [rangeIndex >= 0 ? rangeIndex : 1],
+      riskStyle: (data.risk_style as RiskStyle) || 'balanced',
+      hedgeBudget: String(data.hedge_budget_monthly || (isBiz ? 1000 : 500)),
+    });
 
     setLoading(false);
   };
@@ -133,7 +152,8 @@ export default function Profile() {
           sensitivities: selectedExposures,
           hedge_budget_monthly: parseFloat(hedgeBudget) || 0,
           profile_json: { 
-            name: companyName,
+            name: userName || companyName || null,  // User's personal name
+            company_name: isBusiness ? companyName : null,  // Business-specific
             description: description || null,
             exposure_range: exposureLabel,
             debt_exposures: selectedDebt,
@@ -153,6 +173,53 @@ export default function Profile() {
     }
   };
 
+  const isBusiness = profile?.profile_type === 'business';
+  const dirty = useMemo(() => {
+    const snapshot = JSON.stringify({
+      userName,
+      companyName,
+      industry,
+      location,
+      description,
+      selectedExposures,
+      selectedDebt,
+      planningWindow,
+      exposureRange,
+      riskStyle,
+      hedgeBudget,
+    });
+    return initialSnapshotRef.current !== '' && snapshot !== initialSnapshotRef.current;
+  }, [
+    userName,
+    companyName,
+    industry,
+    location,
+    description,
+    selectedExposures,
+    selectedDebt,
+    planningWindow,
+    exposureRange,
+    riskStyle,
+    hedgeBudget,
+  ]);
+
+  const completion = useMemo(() => {
+    const identityComplete =
+      (isBusiness ? companyName.trim().length > 0 && industry.trim().length > 0 : true) &&
+      location.trim().length > 0;
+    const exposuresComplete = selectedExposures.length > 0;
+    const prefsComplete = Number(hedgeBudget) > 0 && !!planningWindow && typeof riskStyle === 'string';
+
+    const steps = [
+      { label: 'Identity', done: identityComplete },
+      { label: 'Exposure', done: exposuresComplete },
+      { label: 'Strategy', done: prefsComplete },
+    ];
+
+    const pct = Math.round((steps.filter((s) => s.done).length / steps.length) * 100);
+    return { pct, steps };
+  }, [companyName, industry, location, isBusiness, selectedExposures.length, hedgeBudget, planningWindow, riskStyle]);
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -161,23 +228,41 @@ export default function Profile() {
     );
   }
 
-  const isBusiness = profile?.profile_type === 'business';
-
   return (
     <ScrollArea className="h-full w-full">
       <div className="container mx-auto px-6 py-10 max-w-5xl">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Risk Profile</h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               Configure how Probable identifies and manages your hedging needs
             </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Progress value={completion.pct} className="w-36 h-2" />
+                <span className="font-medium text-foreground">{completion.pct}%</span>
+                <span>complete</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                {dirty ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-muted-foreground">Unsaved changes</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">All changes saved</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           <Button 
             onClick={handleSave} 
-            disabled={saving} 
+            disabled={saving || !dirty} 
             size="lg"
             className="gap-2 shadow-md hover:shadow-lg transition-all"
           >
@@ -199,38 +284,44 @@ export default function Profile() {
         <div className="grid grid-cols-1 gap-6">
           
           {/* 1. Identity */}
-          <RiskIdentity 
-            isBusiness={isBusiness}
-            name={companyName}
-            setName={setCompanyName}
-            description={description}
-            setDescription={setDescription}
-            industry={industry}
-            setIndustry={setIndustry}
-            location={location}
-            setLocation={setLocation}
-          />
+          <div id="risk-identity">
+            <RiskIdentity 
+              isBusiness={isBusiness}
+              name={companyName}
+              setName={setCompanyName}
+              description={description}
+              setDescription={setDescription}
+              industry={industry}
+              setIndustry={setIndustry}
+              location={location}
+              setLocation={setLocation}
+            />
+          </div>
 
           {/* 2. Exposure Matrix */}
-          <ExposureMatrix 
-            isBusiness={isBusiness}
-            selectedExposures={selectedExposures}
-            toggleExposure={toggleExposure}
-            selectedDebt={selectedDebt}
-            toggleDebt={toggleDebt}
-          />
+          <div id="exposure-matrix">
+            <ExposureMatrix 
+              isBusiness={isBusiness}
+              selectedExposures={selectedExposures}
+              toggleExposure={toggleExposure}
+              selectedDebt={selectedDebt}
+              toggleDebt={toggleDebt}
+            />
+          </div>
 
           {/* 3. Hedging Preferences */}
-          <HedgingPreferences 
-            planningWindow={planningWindow}
-            setPlanningWindow={setPlanningWindow}
-            exposureRange={exposureRange}
-            setExposureRange={setExposureRange}
-            hedgeBudget={hedgeBudget}
-            setHedgeBudget={setHedgeBudget}
-            riskStyle={riskStyle}
-            setRiskStyle={setRiskStyle}
-          />
+          <div id="hedging-preferences">
+            <HedgingPreferences 
+              planningWindow={planningWindow}
+              setPlanningWindow={setPlanningWindow}
+              exposureRange={exposureRange}
+              setExposureRange={setExposureRange}
+              hedgeBudget={hedgeBudget}
+              setHedgeBudget={setHedgeBudget}
+              riskStyle={riskStyle}
+              setRiskStyle={setRiskStyle}
+            />
+          </div>
 
         </div>
 

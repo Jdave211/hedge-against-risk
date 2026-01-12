@@ -36,6 +36,9 @@ export default function Onboarding() {
   const [step, setStep] = useState<'type' | 1 | 2 | 3 | 4 | 5>('type');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   
+  // ============ SHARED STATE ============
+  const [userName, setUserName] = useState('');
+  
   // ============ BUSINESS STATE ============
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
@@ -141,7 +144,8 @@ export default function Onboarding() {
           sensitivities: selectedExposures,
           hedge_budget_monthly: 1000,
           profile_json: { 
-            name: companyName,
+            name: userName || companyName,  // User's personal name
+            company_name: companyName,
             description: businessDescription || null,
             exposure_range: exposureLabel,
           },
@@ -161,6 +165,7 @@ export default function Onboarding() {
           sensitivities: selectedBudgetImpacts,
           hedge_budget_monthly: 500,
           profile_json: { 
+            name: userName || null,  // User's personal name
             description: individualDescription || null,
             hedge_budget: budgetLabel,
             debt_exposures: selectedDebt,
@@ -174,7 +179,7 @@ export default function Onboarding() {
 
       toast({
         title: 'Profile created!',
-        description: `Welcome to Hedge AI. We're ready to help protect your ${profileType === 'business' ? 'business' : 'finances'}.`,
+        description: `Welcome to Probable. We're ready to help protect your ${profileType === 'business' ? 'business' : 'finances'}.`,
       });
       navigate('/home');
     } catch (error: any) {
@@ -249,7 +254,7 @@ export default function Onboarding() {
         <div className="w-full max-w-2xl relative space-y-8">
           <div className="text-center space-y-4">
             <Shield className="h-12 w-12 text-primary mx-auto" />
-            <h1 className="text-3xl font-bold">Welcome to Hedge</h1>
+            <h1 className="text-3xl font-bold">Welcome to Probable</h1>
             <p className="text-muted-foreground">
               Tell us a bit about yourself so we can personalize your experience.
             </p>
@@ -308,12 +313,22 @@ export default function Onboarding() {
                   <User className="h-4 w-4" />
                   Step 1 of 5
                 </div>
-                <CardTitle className="text-2xl">Basics</CardTitle>
+                <CardTitle className="text-2xl">Let's get started</CardTitle>
                 <CardDescription>
-                  Where are you located? This helps us find relevant hedges.
+                  Tell us about yourself so we can personalize your experience.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>What should we call you?</Label>
+                  <Input
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Enter your name..."
+                    className="border-l-4 border-l-primary/50"
+                  />
+                </div>
+                
                 <div className="space-y-3">
                   <Label>Location</Label>
                   <LocationCombobox
@@ -638,20 +653,31 @@ export default function Onboarding() {
                 <Building2 className="h-4 w-4" />
                 Step 1 of 5
               </div>
-              <CardTitle className="text-2xl">Business Basics</CardTitle>
+              <CardTitle className="text-2xl">Let's get started</CardTitle>
               <CardDescription>
-                Let's start with some information about your business.
+                Tell us about yourself and your business.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="userName">Your Name</Label>
+                <Input
+                  id="userName"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Enter your name..."
+                  className="border-l-4 border-l-primary/50"
+                />
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name</Label>
                 <Input
                   id="companyName"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Enter your company name"
-                  className="h-12"
+                  placeholder="Enter your company name..."
+                  className="border-l-4 border-l-primary/50"
                 />
               </div>
 
