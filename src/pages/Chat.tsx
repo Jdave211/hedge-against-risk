@@ -21,7 +21,7 @@ export default function Chat() {
     loading,
     conversationsLoading,
     sendMessage,
-  } = useChat();
+  } = useChat(user?.id);
 
   // Handle query from URL params
   useEffect(() => {
