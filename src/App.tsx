@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ChatProvider } from "@/context/ChatContext";
 import { Loader2 } from "lucide-react";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -12,10 +13,10 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
-import Search from "./pages/Search";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +36,13 @@ function AppRoutes() {
       <Route path="/" element={user ? <Navigate to="/home" replace /> : <Landing />} />
       <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <Auth />} />
       <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/chat" element={<Chat />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/search" element={<Search />} />
+      
+      {/* Protected Routes wrapped in SidebarLayout */}
+      <Route path="/home" element={<SidebarLayout><Home /></SidebarLayout>} />
+      <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
+      <Route path="/chat" element={<SidebarLayout><Chat /></SidebarLayout>} />
+      <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
+      
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="*" element={<NotFound />} />
@@ -47,10 +50,19 @@ function AppRoutes() {
   );
 }
 
+function ChatWrapper() {
+  const { user } = useAuth();
+  return (
+    <ChatProvider userId={user?.id}>
+      <AppRoutes />
+    </ChatProvider>
+  );
+}
+
 function AppContent() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <ChatWrapper />
     </AuthProvider>
   );
 }

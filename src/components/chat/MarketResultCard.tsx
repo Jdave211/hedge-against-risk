@@ -45,6 +45,7 @@ export function MarketResultCard({ result }: MarketResultCardProps) {
             </div>
           </div>
         ))}
+
         {kalshiUrl && (
           <Button
             variant="outline"

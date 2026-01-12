@@ -7,16 +7,17 @@ import { Button } from '@/components/ui/button';
 interface SearchBarProps {
   large?: boolean;
   placeholder?: string;
+  searchPath?: string; // Path to navigate to on search (default: /chat)
 }
 
-export function SearchBar({ large = false, placeholder = "Ask Hedge AI anything..." }: SearchBarProps) {
+export function SearchBar({ large = false, placeholder = "Ask Hedge AI anything...", searchPath = "/chat" }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/chat?q=${encodeURIComponent(query.trim())}`);
+      navigate(`${searchPath}?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
