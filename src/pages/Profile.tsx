@@ -165,24 +165,38 @@ export default function Profile() {
 
   return (
     <ScrollArea className="h-full w-full">
-      <div className="container mx-auto px-6 py-10 max-w-4xl">
+      <div className="container mx-auto px-6 py-10 max-w-5xl">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Risk Profile</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your risk identity and hedging preferences.
+            <h1 className="text-3xl font-semibold tracking-tight">Risk Profile</h1>
+            <p className="text-muted-foreground text-sm mt-1.5">
+              Configure how Probable identifies and manages your hedging needs
             </p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2 shadow-lg hover:shadow-xl transition-all">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Changes
+          <Button 
+            onClick={handleSave} 
+            disabled={saving} 
+            size="lg"
+            className="gap-2 shadow-md hover:shadow-lg transition-all"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Changes
+              </>
+            )}
           </Button>
         </div>
 
         {/* Interactive Components Grid */}
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-6">
           
           {/* 1. Identity */}
           <RiskIdentity 
@@ -220,10 +234,20 @@ export default function Profile() {
 
         </div>
 
-        <div className="mt-12 text-center">
-          <Button variant="ghost" className="text-muted-foreground hover:text-foreground gap-2" onClick={() => navigate('/dashboard')}>
-            Go to Dashboard <ArrowRight className="h-4 w-4" />
-          </Button>
+        {/* Footer */}
+        <div className="mt-10 pt-6 border-t border-border/50">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <p>Changes are applied immediately to your recommendations</p>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="gap-2 hover:text-foreground" 
+              onClick={() => navigate('/dashboard')}
+            >
+              Back to Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </ScrollArea>

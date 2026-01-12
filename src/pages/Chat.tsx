@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useChat } from '@/hooks/useChat';
+import { useChatContext } from '@/context/ChatContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChatMessage } from '@/components/chat/ChatMessage';
@@ -21,7 +21,7 @@ export default function Chat() {
     loading,
     conversationsLoading,
     sendMessage,
-  } = useChat(user?.id);
+  } = useChatContext();
 
   // Handle query from URL params
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function Chat() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-10 pb-6">
+              <div className="space-y-12 pb-6">
                 {messages.map((message) => (
                   <ChatMessage key={message.id} message={message} />
                 ))}
@@ -126,32 +126,35 @@ export default function Chat() {
             </div>
           </div>
         ) : (
-          /* Conversation input (ChatGPT-style, centered) */
-          <div className="w-full border-t border-border/60 bg-background/60 backdrop-blur-sm">
+          /* Conversation input (floating, no border) */
+          <div className="w-full">
             <div className="max-w-3xl mx-auto w-full px-4 py-4">
-              <div className="rounded-2xl border border-border bg-card shadow-sm px-3 py-2 flex items-center gap-2">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Message Probable…"
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  disabled={loading}
-                  className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-3 py-3 h-auto text-base placeholder:text-muted-foreground/60"
-                />
-                <Button
-                  onClick={handleSend}
-                  disabled={loading || !input.trim()}
-                  size="icon"
-                  className="h-10 w-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shrink-0"
-                  aria-label="Send"
-                >
-                  <ArrowUp className="h-5 w-5" />
-                </Button>
-              </div>
-              <div className="text-center mt-2">
-                <span className="text-[10px] text-muted-foreground/60">
-                  AI can make mistakes. Check important info.
-                </span>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/5 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                <div className="relative rounded-2xl bg-card/80 backdrop-blur-xl shadow-lg hover:shadow-xl transition-shadow px-3 py-2 flex items-center gap-2 border border-border/50 focus-within:border-primary/30">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Message Probable…"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    disabled={loading}
+                    className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-3 py-3 h-auto text-base placeholder:text-muted-foreground/60"
+                  />
+                  <Button
+                    onClick={handleSend}
+                    disabled={loading || !input.trim()}
+                    size="icon"
+                    className="h-10 w-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shrink-0"
+                    aria-label="Send"
+                  >
+                    <ArrowUp className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-[10px] text-muted-foreground/60">
+                    AI can make mistakes. Check important info.
+                  </span>
+                </div>
               </div>
             </div>
           </div>

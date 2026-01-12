@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TrendingUp, Clock, CheckCircle, Loader2, ExternalLink, DollarSign, X, Undo2, TrendingDown, ShieldCheck, FileText, Upload, AlertTriangle, Target } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, Loader2, ExternalLink, DollarSign, X, Undo2, TrendingDown, ShieldCheck, FileText, Upload, AlertTriangle, Target, Search, Compass } from 'lucide-react';
 import { Json } from '@/integrations/supabase/types';
 import { logAction, getFinancialAnalysis } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -56,6 +57,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
+  
+  // Market search state
+  const [marketSearchQuery, setMarketSearchQuery] = useState('');
+  const [searchedMarkets, setSearchedMarkets] = useState<any[]>([]);
+  const [marketSearchLoading, setMarketSearchLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -84,6 +90,47 @@ export default function Dashboard() {
       setAnalysisLoading(false);
     }
   };
+
+  const searchMarkets = async (query: string) => {
+    if (!query.trim()) {
+      setSearchedMarkets([]);
+      return;
+    }
+
+    setMarketSearchLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/v1/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          query: query.trim(), 
+          limit: 12, // Limit to 12 markets
+          includeClosed: false 
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to search markets');
+      }
+
+      const data = await res.json();
+      setSearchedMarkets(data.results || []);
+    } catch (error) {
+      console.error('Error searching markets:', error);
+      toast({
+        title: "Search failed",
+        description: "Unable to search markets. Please try again.",
+        variant: "destructive",
+      });
+      setSearchedMarkets([]);
+    } finally {
+      setMarketSearchLoading(false);
+    }
+  };
+
+  const handleMarketSearch = useCallback(() => {
+    searchMarkets(marketSearchQuery);
+  }, [marketSearchQuery]);
 
   const fetchRecommendations = async () => {
     if (!user) return;
@@ -252,7 +299,7 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* Main Tabs: Recommendations and Exposure */}
+        {/* Main Tabs: Recommendations, Exposure, and Explore Markets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-muted p-1">
             <TabsTrigger value="recommendations" className="gap-2">
@@ -263,84 +310,88 @@ export default function Dashboard() {
               <FileText className="h-4 w-4" />
               Exposure
             </TabsTrigger>
+            <TabsTrigger value="explore" className="gap-2">
+              <Compass className="h-4 w-4" />
+              Explore Markets
+            </TabsTrigger>
           </TabsList>
 
           {/* RECOMMENDATIONS TAB */}
           <TabsContent value="recommendations" className="space-y-6">
-            {/* Stats Overview */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
+        {/* Stats Overview */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
               className="grid sm:grid-cols-3 gap-4"
-            >
-              <Card className="bg-card border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardDescription>Total Recommendations</CardDescription>
-                  <CardTitle className="text-3xl">{recommendations.length}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="bg-card border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardDescription>Hedge Now</CardDescription>
-                  <CardTitle className="text-3xl text-primary">{hedgeNow.length}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="bg-card border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardDescription>Watching</CardDescription>
-                  <CardTitle className="text-3xl">{waiting.length}</CardTitle>
-                </CardHeader>
-              </Card>
-            </motion.div>
+        >
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-2">
+              <CardDescription>Total Recommendations</CardDescription>
+              <CardTitle className="text-3xl">{recommendations.length}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-2">
+              <CardDescription>Hedge Now</CardDescription>
+              <CardTitle className="text-3xl text-primary">{hedgeNow.length}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-2">
+              <CardDescription>Watching</CardDescription>
+              <CardTitle className="text-3xl">{waiting.length}</CardTitle>
+            </CardHeader>
+          </Card>
+        </motion.div>
 
             {/* Sub-tabs for recommendations */}
-            <Tabs 
+        <Tabs
               value={searchParams.get("tab") || "all"}
-              onValueChange={(value) => {
-                const next = new URLSearchParams(searchParams);
-                next.set("tab", value);
-                setSearchParams(next, { replace: true });
-              }}
+          onValueChange={(value) => {
+            const next = new URLSearchParams(searchParams);
+            next.set("tab", value);
+            setSearchParams(next, { replace: true });
+          }}
               className="space-y-4"
-            >
-              <TabsList className="bg-muted p-1">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="hedge_now">Hedge Now</TabsTrigger>
-                <TabsTrigger value="watching">Watching</TabsTrigger>
-              </TabsList>
+        >
+          <TabsList className="bg-muted p-1">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="hedge_now">Hedge Now</TabsTrigger>
+            <TabsTrigger value="watching">Watching</TabsTrigger>
+          </TabsList>
 
-              <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
                 {(searchParams.get("tab") || "all") === 'all' && (
-                  <MotionTabsContent key="all" value="all">
-                    <RecommendationsList 
-                      recommendations={recommendations} 
-                      onDismiss={handleDismiss}
-                      onKalshiClick={handleKalshiClick}
-                    />
-                  </MotionTabsContent>
-                )}
+              <MotionTabsContent key="all" value="all">
+                <RecommendationsList 
+                  recommendations={recommendations} 
+                  onDismiss={handleDismiss}
+                  onKalshiClick={handleKalshiClick}
+                />
+              </MotionTabsContent>
+            )}
 
                 {searchParams.get("tab") === 'hedge_now' && (
-                  <MotionTabsContent key="hedge_now" value="hedge_now">
-                    <RecommendationsList 
-                      recommendations={hedgeNow} 
-                      onDismiss={handleDismiss}
-                      onKalshiClick={handleKalshiClick}
-                    />
-                  </MotionTabsContent>
-                )}
+              <MotionTabsContent key="hedge_now" value="hedge_now">
+                <RecommendationsList 
+                  recommendations={hedgeNow} 
+                  onDismiss={handleDismiss}
+                  onKalshiClick={handleKalshiClick}
+                />
+              </MotionTabsContent>
+            )}
 
                 {searchParams.get("tab") === 'watching' && (
-                  <MotionTabsContent key="watching" value="watching">
-                    <RecommendationsList 
-                      recommendations={waiting} 
-                      onDismiss={handleDismiss}
-                      onKalshiClick={handleKalshiClick}
-                    />
-                  </MotionTabsContent>
-                )}
-              </AnimatePresence>
+              <MotionTabsContent key="watching" value="watching">
+                <RecommendationsList 
+                  recommendations={waiting} 
+                  onDismiss={handleDismiss}
+                  onKalshiClick={handleKalshiClick}
+                />
+              </MotionTabsContent>
+            )}
+          </AnimatePresence>
             </Tabs>
           </TabsContent>
 
@@ -352,6 +403,173 @@ export default function Dashboard() {
               analysisLoading={analysisLoading}
               onAnalysisUpdate={fetchFinancialAnalysis}
             />
+          </TabsContent>
+
+          {/* EXPLORE MARKETS TAB */}
+          <TabsContent value="explore" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="bg-card border-border shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Search className="h-5 w-5 text-primary" />
+                    Search Prediction Markets
+                  </CardTitle>
+                  <CardDescription>
+                    Explore live prediction markets across multiple platforms to find hedging opportunities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Search for markets (e.g., 'inflation', 'gas prices', 'interest rates')..."
+                      value={marketSearchQuery}
+                      onChange={(e) => setMarketSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleMarketSearch()}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleMarketSearch}
+                      disabled={marketSearchLoading || !marketSearchQuery.trim()}
+                      className="gap-2"
+                    >
+                      {marketSearchLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Searching
+                        </>
+                      ) : (
+                        <>
+                          <Search className="h-4 w-4" />
+                          Search
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Search Results */}
+            {marketSearchLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : searchedMarkets.length > 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Found {searchedMarkets.length} markets for "{marketSearchQuery}"
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setMarketSearchQuery('');
+                      setSearchedMarkets([]);
+                    }}
+                  >
+                    Clear results
+                  </Button>
+                </div>
+                
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {searchedMarkets.map((market) => (
+                    <Card key={market.event_id} className="bg-card/50 hover:bg-card transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {(market.similarity * 100).toFixed(0)}% match
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {market.platform || 'Unknown'}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-sm font-medium leading-tight">
+                          {market.event_title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {market.markets?.map((mkt: any, idx: number) => (
+                          <div key={idx} className="space-y-2">
+                            {mkt.market_title !== market.event_title && (
+                              <p className="text-xs text-muted-foreground">
+                                {mkt.market_title}
+                              </p>
+                            )}
+                            <div className="grid grid-cols-2 gap-2">
+                              {mkt.outcomes?.map((outcome: any, outIdx: number) => (
+                                <div
+                                  key={outIdx}
+                                  className="flex items-center justify-between bg-background rounded-md px-2 py-1.5 text-xs"
+                                >
+                                  <span className="font-medium">{outcome.label}</span>
+                                  {outcome.latest_price?.price != null && (
+                                    <span className="font-mono text-primary">
+                                      {(outcome.latest_price.price * 100).toFixed(0)}¢
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+
+                        {market.series_ticker && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs gap-1"
+                            asChild
+                          >
+                            <a
+                              href={
+                                market.platform === 'polymarket'
+                                  ? `https://polymarket.com/event/${market.series_ticker}`
+                                  : `https://kalshi.com/markets/${market.series_ticker}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              View on {market.platform === 'polymarket' ? 'Polymarket' : 'Kalshi'}
+                            </a>
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </motion.div>
+            ) : marketSearchQuery && !marketSearchLoading ? (
+              <Card className="bg-muted/30">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">
+                    No markets found for "{marketSearchQuery}". Try a different search term.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-muted/30">
+                <CardContent className="py-12 text-center space-y-2">
+                  <Compass className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                  <p className="text-muted-foreground">
+                    Search for prediction markets to explore hedging opportunities
+                  </p>
+                  <p className="text-sm text-muted-foreground/70">
+                    Try searching for: inflation, gas prices, interest rates, or any economic event
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
