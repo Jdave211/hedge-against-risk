@@ -27,8 +27,9 @@ export interface SearchResult {
 }
 
 export interface HedgeAPIResponse {
-  query: string;
-  results: SearchResult[];
+  query?: string;
+  results?: SearchResult[];
+  markets?: SearchResult[];
 }
 
 export interface Message {

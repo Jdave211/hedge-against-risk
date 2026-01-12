@@ -8,6 +8,9 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
+  
+  // Support both old format (results) and new format (markets)
+  const marketResults = message.response_data?.markets || message.response_data?.results || [];
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -30,9 +33,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
         >
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         </div>
-        {message.response_data?.results && message.response_data.results.length > 0 && (
+        {marketResults.length > 0 && (
           <div className="space-y-2">
-            {message.response_data.results.map((result) => (
+            {marketResults.map((result) => (
               <MarketResultCard key={result.event_id} result={result} />
             ))}
           </div>

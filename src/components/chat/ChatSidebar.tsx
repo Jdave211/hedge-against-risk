@@ -20,36 +20,40 @@ export function ChatSidebar({
   onDeleteConversation,
 }: ChatSidebarProps) {
   return (
-    <div className="w-64 border-r bg-muted/30 flex flex-col h-full">
+    <div className="w-64 border-r bg-muted/30 flex flex-col h-full overflow-hidden">
       <div className="p-3 border-b">
         <Button onClick={onNewChat} className="w-full gap-2" variant="outline">
           <Plus className="h-4 w-4" />
           New Chat
         </Button>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 w-full">
         <div className="p-2 space-y-1">
           {conversations.map((conv) => (
             <div
               key={conv.id}
               className={cn(
-                'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors',
+                'group flex items-center gap-1 rounded-lg px-2 py-2 text-sm hover:bg-muted transition-colors',
                 activeConversationId === conv.id && 'bg-muted'
               )}
-              onClick={() => onSelectConversation(conv.id)}
             >
               <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-              <span className="flex-1 truncate">{conv.title}</span>
+              <div 
+                className="flex-1 min-w-0 cursor-pointer overflow-hidden"
+                onClick={() => onSelectConversation(conv.id)}
+              >
+                <span className="truncate block text-sm">{conv.title}</span>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 flex-shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteConversation(conv.id);
                 }}
               >
-                <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive transition-colors" />
               </Button>
             </div>
           ))}

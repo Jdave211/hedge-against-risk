@@ -15,6 +15,103 @@ export async function searchEvents(query: string) {
   return res.json();
 }
 
+// ============ NEW CHAT API ENDPOINTS ============
+
+export interface ChatMessagePayload {
+  conversation_id?: string;
+  message: string;
+  user_id: string;
+}
+
+export interface ChatMessageResponse {
+  conversation_id: string;
+  message_id: string;
+  response: string;
+  markets?: any[] | null;
+}
+
+export async function sendChatMessage(payload: ChatMessagePayload): Promise<ChatMessageResponse> {
+  const res = await fetch(`${API_URL}/v1/chat/message`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Chat message failed (${res.status}): ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function deleteChatConversation(conversationId: string, userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/v1/chat/${conversationId}?user_id=${userId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete conversation failed (${res.status}): ${text}`);
+  }
+}
+
+// ============ DOCUMENT ANALYSIS API ENDPOINTS ============
+
+export interface DocumentAnalysisResponse {
+  status: string;
+  analysis: {
+    income?: {
+      amount: number | null;
+      frequency: string | null;
+    };
+    expenses?: Record<string, number>;
+    vulnerabilities?: string[];
+    hedge_suggestions?: string[];
+    summary?: string;
+    analyzed_at: string;
+  };
+}
+
+export async function analyzeDocument(userId: string, file: File): Promise<DocumentAnalysisResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_URL}/v1/profile/${userId}/analyze-document`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Document analysis failed (${res.status}): ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function getFinancialAnalysis(userId: string): Promise<any> {
+  const res = await fetch(`${API_URL}/v1/profile/${userId}/financial-analysis`);
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Get financial analysis failed (${res.status}): ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function deleteFinancialAnalysis(userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/v1/profile/${userId}/financial-analysis`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete financial analysis failed (${res.status}): ${text}`);
+  }
+}
+
 export interface Notification {
   id: string;
   user_id: string;
