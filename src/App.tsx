@@ -10,7 +10,10 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
+import Recommendations from "./pages/dashboard/Recommendations";
+import Exposure from "./pages/dashboard/Exposure";
+import Watching from "./pages/dashboard/Watching";
+import Explore from "./pages/dashboard/Explore";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import Terms from "./pages/Terms";
@@ -39,7 +42,10 @@ function AppRoutes() {
       
       {/* Protected Routes wrapped in SidebarLayout */}
       <Route path="/home" element={<SidebarLayout><Home /></SidebarLayout>} />
-      <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
+      <Route path="/dashboard" element={<SidebarLayout><Recommendations /></SidebarLayout>} />
+      <Route path="/dashboard/exposure" element={<SidebarLayout><Exposure /></SidebarLayout>} />
+      <Route path="/dashboard/watching" element={<SidebarLayout><Watching /></SidebarLayout>} />
+      <Route path="/dashboard/explore" element={<SidebarLayout><Explore /></SidebarLayout>} />
       <Route path="/chat" element={<SidebarLayout><Chat /></SidebarLayout>} />
       <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
       
