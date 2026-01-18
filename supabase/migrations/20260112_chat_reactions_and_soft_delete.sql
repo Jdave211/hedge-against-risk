@@ -89,3 +89,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Grant execute permission on cleanup function
 GRANT EXECUTE ON FUNCTION cleanup_old_deleted_conversations() TO authenticated;
 
+
+
+
+
+
